@@ -37,6 +37,12 @@ class QuestionModelTests(TestCase):
         time = timezone.now() - datetime.timedelta(days=30)
         self.question.pub_date = time
         self.assertFalse(self.question.was_published_recently())
+        
+    def test_question_without_choices(self):
+        pass
+    
+    def test_question_with_choices(self):
+        pass
 
 def create_question(question_text, days):
     """
@@ -135,5 +141,36 @@ class QuestionDetailViewTests(TestCase):
         """
         past_question = create_question('past question', days=-30)
         url = reverse('polls:detail', args=(past_question.id,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+    
+    def test_question_without_choices(self):
+        """
+        If someones enter into detailed view of a question, It will be displayed no choices available
+        """
+        question = create_question('No choices Quesstion', days=-1)
+        response = self.client.get(reverse('polls:detail', args=(question.id,)))
+        choices = question.choice_set.all()
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'No choices are available.')
+        self.assertQuerysetEqual(choices, [])
+
+class QuestionResultViewTests(TestCase):
+    def test_future_question(self):
+        """
+        The detail view from a question with a future pub_date must return 404 error not found
+        """
+        future_question = create_question('future question', days=30)
+        url = reverse('polls:results', args=(future_question.id,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+        
+    def test_past_question(self):
+        """
+        The detail view from a question with a past pub_date must display the question's text
+        """
+        past_question = create_question('past question', days=-30)
+        url = reverse('polls:results', args=(past_question.id,))
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)

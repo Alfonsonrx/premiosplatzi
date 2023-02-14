@@ -5,8 +5,9 @@
         {% if error_message %}
             <p><strong>{{ error_message }}</strong></p>
         {% endif %}
-        <ul>
-            {% for choice in question.choice_set.all %}
+        {% if question.choice_set.all %}
+            <ul>
+                {% for choice in question.choice_set.all %}
                 <li>
                     <input 
                         type="radio" 
@@ -17,8 +18,11 @@
                         {{ choice.choice_text }}
                     </label>
                 </li>
-            {% endfor %}
-        </ul>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No choices are available.</p>
+        {% endif %}
     </fieldset>
     <input type="submit" value="Votar">
 </form>
