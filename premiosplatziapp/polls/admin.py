@@ -19,11 +19,17 @@ class AtLeastOneRequiredInlineFormSet(BaseInlineFormSet):
 class ChoicesInline(admin.TabularInline):
     model = Choice
     formset= AtLeastOneRequiredInlineFormSet
-    extra = 1
+    extra = 2
     exclude= ['votes']
     
 class QuestionAdmin(admin.ModelAdmin):
     inlines = (ChoicesInline,)
+    list_display = ('question_text', 'pub_date', 'was_published_recently')
+    ordering = ['pub_date']
+    date_hierarchy = 'pub_date'
+    list_filter = ['pub_date']
+    search_fields = ['question_text']
+
     
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)
